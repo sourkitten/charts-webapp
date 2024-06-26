@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8">
+    <title>ATT - 4739 - 4008</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function uploadFile(formId, filename) {
+            var formData = new FormData(document.getElementById(formId));
+            $.ajax({
+                url: '/data/' + filename,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    alert(filename + " uploaded successfully!");
+                },
+                error: function () {
+                    alert("Failed to upload " + filename);
+                }
+            });
+            return false; // Prevent form from submitting normally
+        }
+    </script>
+</head>
+<body>
+    <!-- Include Header -->
+    <div th:replace="fragments/header :: header" type="header"></div>
+
+    <table>
+        <tr>
+            <th>Exists</th>
+            <th>File Name</th>
+            <th>Action</th>
+        </tr>
+        <tr th:each="fileStatus : ${fileStatuses}">
+            <td th:text="${fileStatus.exists ? 'X' : ''}">[Exists]</td>
+            <td th:text="${fileStatus.name}"></td>
+            <td>
+                <!-- Each file has its own form with an id -->
+                <form id="form-${iterStat.index}" onsubmit="return uploadFile('form-${iterStat.index}', '${fileStatus.name}')">
+                    <input type="file" name="file" required />
+                    <button type="submit">Upload</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+    <p th:text="${message}"></p>
+
+    <!-- Include Footer -->
+    <div th:replace="fragments/footer :: footer" type="footer"></div>
+</body>
+</html>

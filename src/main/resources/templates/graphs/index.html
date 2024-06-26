@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+      <html xmlns:th="http://www.thymeleaf.org">
+      <head>
+      <link rel="stylesheet" type="text/css" href="style.css">
+      <meta charset="UTF-8">
+      <title>ATT - 4739 - 4008</title>
+</head>
+<body>
+<!-- Include Header -->
+<div th:replace="fragments/header :: header" type="header"></div>
+
+
+<span class="graphs-title">Choose a graph you'd like to view:</span>
+<div class="container">
+    <div class="button-grid">
+        <a href="/graphs/annual_surface_temperature_changes" class="graph-selector">
+            <span>Annual Surface Temperature Changes</span>
+        </a>
+        <a href="/graphs/climate-related_disasters_frequency" class="graph-selector">
+            <span>Climate-related Disasters Frequency</span>
+        </a>
+        <a href="/graphs/forest_and_carbon" class="graph-selector">
+            <span>Forest and Carbon</span>
+        </a>
+        <a href="/graphs/land_cover_accounts" class="graph-selector">
+            <span>Land Cover Accounts</span>
+        </a>
+    </div>
+</div>
+
+<!-- Include Footer -->
+<div th:replace="fragments/footer :: footer" type="footer"></div>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

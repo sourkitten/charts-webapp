@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <meta charset="UTF-8">
+    <title>Land Cover Accounts</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+</head>
+<body>
+<!-- Include Header -->
+<div th:replace="fragments/header :: header" type="header"></div>
+
+<div id="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<button onclick="updateChart()">Generate Chart</button>
+<hr class="divider">
+<div id="indicator-selector">
+    <h3>Select indicators:</h3>
+    <div style="display: flex; flex-wrap: wrap;">
+        <div th:each="indicator : ${indicators}" style="flex: 1 1 200px; margin: 5px;">
+            <input type="checkbox" name="indicator" th:value="${indicator}">
+            <span th:text="${indicator}"></span>
+        </div>
+    </div>
+</div>
+<hr class="divider">
+<div id="country-selector">
+    <h3>Select countries:</h3>
+    <div style="display: flex; flex-wrap: wrap;">
+        <div th:each="country : ${countries}" style="flex: 1 1 200px; margin: 5px;">
+            <input type="checkbox" name="country" th:value="${country.ISO3}">
+            <span th:text="${country.ISO3} + ' : ' + ${country.displayName}"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to fetch data for the selected countries and indicators
+    async function fetchCountryData(countries, indicators) {
+        const response = await fetch('/graphs/land_cover_accounts/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ countries, indicators }),
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.json();
+            console.error('Error fetching data:', errorDetails);
+            throw new Error('Network response was not ok');
+        }
+
+        return response.json();
+    }
+
+    // Function to update the chart
+    async function updateChart() {
+        const selectedCountries = Array.from(document.querySelectorAll('input[name="country"]:checked')).map(cb => cb.value);
+        const selectedIndicators = Array.from(document.querySelectorAll('input[name="indicator"]:checked')).map(cb => cb.value);
+
+        if (selectedCountries.length > 0 && selectedIndicators.length > 0) {
+            const dataPoints = await fetchCountryData(selectedCountries, selectedIndicators);
+            const seriesData = dataPoints.map(countryData => ({
+                name: `${countryData.country} : ${countryData.indicator}`,
+                data: countryData.data.map(dp => [dp.year, dp.value])
+            }));
+
+            Highcharts.chart('chart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Land Cover Accounts'
+                },
+                xAxis: {
+                    title: {
+                        text: 'Year'
+                    },
+                    type: 'linear',
+                    labels: {
+                        formatter: function () {
+                            return this.value; // clean, unformatted number for year
+                        }
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Land Cover'
+                    }
+                },
+                series: seriesData
+            });
+        } else {
+            Highcharts.chart('chart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Land Cover Accounts'
+                },
+                xAxis: {
+                    title: {
+                        text: 'Year'
+                    },
+                    type: 'linear',
+                    labels: {
+                        formatter: function () {
+                            return this.value; // clean, unformatted number for year
+                        }
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Land Cover'
+                    }
+                },
+                series: [] // No data when no country or indicator is selected
+            });
+        }
+    }
+
+    // Initial chart setup
+    document.addEventListener('DOMContentLoaded', updateChart);
+</script>
+
+<!-- Include Footer -->
+<div th:replace="fragments/footer :: footer" type="footer" class="footer"></div>
+</body>
+</html>
